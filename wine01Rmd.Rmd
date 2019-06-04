@@ -1,0 +1,221 @@
+---
+title: "Overall Quality of Pinot Noir in Relation to Source Region and Other Quality Ratings"
+author: "L. Holman, D. Davidsohn"
+output: pdf_document
+---
+###Section 1: Introduction
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;We conducted a study on Pinot-Noir type wine. In particular, we tackled two questions of interest regarding said wine - whether or not the quality of wine can be predicted from the region it originates from and whether or not certain key characteristics of the wine can determine its quality.
+  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Since "quality" is a rating of the wine in question, it's reasonable to expect the rating to base off traits of the wine. Therefore, we expect there to be a relationship with one or more of the wine characteristics and its quality. We hypothesized that the strongest relationship would be between quality and flavor, because no one would acclaim a wine they couldn't drink with enjoyment.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The data comes in the form of 38 observations, known as the "different Pinot Noir wines". The observations come with 7 characteristic-variables describing those wines: clarity, aroma, body, flavor, oakiness, quality and region. Most of the variables are quantitative, being on an ordinal scale. However region in particular is qualitative due to its values being labels for locations. Since the principal questions concern quality of the wines in relation with the other characteristics, it will serve as the response variable. All others are explanatory variables.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The first recorded creation of Pinot Noir wine was in the latter quarter of the 14^th^ century, and was largely ignored until the late 1990's when it surged in popularity around the world (Haeger 2004). By 2002, almost 10% of the top selling wines in American restaurants were Pinot Noir bottles (Haeger 2004). Presently this variety of grape is widely considered to produce some of the finest wines in the world (Robinson 2006) and easily paired with any food (Haeger 2004). So the importance in this study lies in determining what makes Pinot Noir such a desirable wine.
+
+
+###Section 1(.2): Methodology
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;There were no experiments to conduct - the data was provided. As a result, we went straight to the results and analysis stage of the study.
+
+###Section 2: Results and Analysis
+
+####Question 1. Wine Quality vs. Region
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The first primary goal of this study was to ascertain whether the origin of the Pinot Noir wine attributed to its quality or not. We compared the quality of the wine across each of the three regions by conducting a one-way ANOVA test. First however, we checked the assumptions required for such a test. The easiest way to see this in the data was to create a side-by-side boxplot of all the regions and their quality values: 
+
+
+```{r, echo=F}
+wine = read.table("http://www.utsc.utoronto.ca/~butler/c32/wine.txt", header=T)
+attach(wine)
+boxplot(Quality~Region, xlab="Region", ylab="Quality")
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;From the graph above, no outliers were distinguished.
+
+```{r, echo=F}
+aggregate(Quality~Region, data=wine, FUN=sd)
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Clearly, the standard deviations are close to constant. This is the first requirement being met.
+
+
+```{r, echo=F}
+qqnorm(Quality, main="Quality QQ Plot")
+qqline(Quality)
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Based on the Quality QQ plot, we saw that the quality is approximately normally distributed. The second requirement is met.
+
+```{r, echo=F}
+res = Quality - mean(Quality)
+qqnorm(res, main="Residual QQ Plot")
+qqline(res)
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Based on the Residual QQ plot, we saw that the residuals are about normally distributed. The third requirement is met. The final requirement is that each observation in the data is independent. We assume this to be true because there's no test for it and we don't know how each observation in the data was collected.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;At this point we were confident that we met the assumptions for an ANOVA test, and carried it out.
+
+
+```{r, echo=F}
+wine.aov = aov(Quality~factor(Region), data=wine)
+summary(wine.aov)
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Since the p-value was small (smaller than alpha = 0.05), we rejected the null hypothesis that there is no difference between the means in quality (The standard null hypothesis within ANOVA tests). Therefore we say that there was a significant difference in the quality means between each region. We used Tukey's HSD test to find the specific differences. 
+
+```{r, echo=F}
+TukeyHSD(wine.aov, data=wine)
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;From Tukey's HSD test we saw that there was a significant difference in quality between each of the regions, with region 3 having the highest quality, region 1 the second highest, and region 2 having the lowest quality. 
+
+####Question 2.  Wine Quality vs. Wine Clarity, Aroma, Body, Flavor, and Oakiness Ratings
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The second key question was whether any of the characteristic-variables have a relationship with quality so that high quality could be predicted using it.
+
+```{r, echo=F}
+wine2 = subset(wine, select=-c(Region))
+plot(wine2)
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;From the paired plot we observed that there was some relation between Quality and each of Flavor, Body, and Aroma. Backwards elimination was run on the model (Quality as response, all others minus regions as explanatory) to remove the insignificant variables from the model (alpha was 0.05).
+
+```{r, echo=F}
+lm3 = lm(Quality~Aroma+Flavor+Oakiness)
+summary(lm3)
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;We saw that Quality was predicted by Aroma, Flavor, and Oakiness at a significance of 95% (alpha = 0.05).
+
+```{r, echo=F}
+#residuals for Quality
+fit = fitted(lm3)
+res = resid(lm3)
+plot(fit, res)
+lines(lowess(fit,res))
+
+#residuals for Aroma
+plot(Aroma, res)
+lines(lowess(Aroma,res))
+
+#residuals for Flavor
+plot(Flavor, res)
+lines(lowess(Flavor,res))
+
+#residuals for Oakiness
+plot(Oakiness, res)
+lines(lowess(Oakiness,res))
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The graphs above confirm the residuals were randomly dispersed. This confirms that a linear fit is the appropriate choice.
+
+```{r, echo=F}
+z = rep(1,38)
+lmlev = lm(z~Aroma+Flavor+Oakiness)
+h = hatvalues(lmlev)
+subset = subset(wine, select=-c(Clarity, Body, Region))
+cbind(subset,h)
+Leverage = 2*(3+1)/38
+for (i in h) {
+   if (i > Leverage)
+   print(i)
+   }
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;At this point, we decided to apply leverage to test for any outliers. This is the process where a "leverage" value is calculated for each observation by using hat values on a fitted model. The scores are then compared to the leverage score (generated from the number of observations and number of explanatory). If the leverage value is greater than the score, then that particular observation is an outlier. The outliers found running this test were observations 14 and 37. They do not seem like mistakes (aren't influential outliers), so we will opt out of deleting them.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;After eliminating Clarity and Body, we remain with Aroma, Taste and Oakiness as significant explanatory variables. So these three have a strong relationship with Quality.
+
+```{r, echo=F}
+predictors = subset(wine, select=-c(Region, Quality))
+cor(predictors)
+lm3 = lm(Flavor~Aroma+Body)
+summary(lm3)
+```
+
+
+##Section 3: Conclusions
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Regarding the first question - we found that the quality of the wine differed between the regions where it was supplied from. Highest quality wine predominantly comes from the third region - then the first and finally the second. The second question was a little harder but we can conclude high values of Aroma, Flavor and Oakiness can be associated with a higher Quality of wine. Furthermore, the overall wine Quality can be predicted from these three variables.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A possible concern in the data would be the two outliers we discerned. They could have potentially skewed our model to the point of inaccuracy by not removing them. The defence against this is that we were told not to delete outliers if they are not perceived to be mistakes. We reason they are not because they're only slightly larger than the leverage score (they're moderate leverage outliers). Another possible concern is We saw that the correlations between Aroma and Body, Aroma and Flavor, as well as Flavor and Body were suspiciously high. This would imply that one or more of these variables is dependent on another. This is bad because it would mean that multicollinearity has occurred, resulting in uncertainty in trying to predict Quality.
+
+###Section 4: Appendix
+
+```
+#part 1
+wine = read.table("http://www.utsc.utoronto.ca/~butler/c32/wine.txt", header=T)
+attach(wine)
+
+boxplot(Quality~Region, xlab="Region", ylab="Quality")
+
+aggregate(Quality~Region, data=wine, FUN=sd)
+
+qqnorm(Quality, main="Quality QQ Plot")
+qqline(Quality)
+
+res = Quality - mean(Quality)
+qqnorm(res, main="Residual QQ Plot")
+qqline(res)
+
+wine.aov = aov(Quality~factor(Region), data=wine)
+summary(wine.aov)
+
+TukeyHSD(wine.aov, data=wine)
+
+#part 2
+wine2 = subset(wine, select=-c(Region))
+plot(wine2)
+
+lm = lm(Quality~Clarity+Aroma+Body+Flavor+Oakiness)
+summary(lm)
+lm2 = lm(Quality~Clarity+Aroma+Flavor+Oakiness)
+summary(lm2)
+lm3 = lm(Quality~Aroma+Flavor+Oakiness)
+summary(lm3)
+
+
+#residuals for Quality
+fit = fitted(lm3)
+res = resid(lm3)
+plot(fit, res)
+lines(lowess(fit,res))
+
+#residuals for Aroma
+plot(Aroma, res)
+lines(lowess(Aroma,res))
+
+#residuals for Flavor
+plot(Flavor, res)
+lines(lowess(Flavor,res))
+
+#residuals for Oakiness
+plot(Oakiness, res)
+lines(lowess(Oakiness,res))
+
+
+
+z = rep(1,38)
+lmlev = lm(z~Aroma+Flavor+Oakiness)
+h = hatvalues(lmlev)
+cbind(wine,h)
+Leverage = 2*(3+1)/38
+for (i in h) {
+  if (i > Leverage)
+    print(i)
+}
+
+lm = lm(Flavor~Clarity+Aroma+Body+Oakiness)
+summary(lm)
+lm2 = lm(Flavor~Aroma+Body+Oakiness)
+summary(lm2)
+lm3 = lm(Flavor~Aroma+Body)
+summary(lm3)
+
+```
+
+###Section 5: References
+
+* Haeger, John Winthrop (2004).  *North American Pinot Noir, First Edition*. University of California Press.
+* Robinson, Jancis (2006). *The Oxford Companion to Wine, Third Edition*. Oxford University Press.
