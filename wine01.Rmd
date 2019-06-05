@@ -21,7 +21,7 @@ output: pdf_document
 
 ####Question 1. Wine Quality vs. Region
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The first primary goal of this study was to ascertain whether the origin of the Pinot Noir wine attributed to its quality or not. We compared the quality of the wine across each of the three regions by conducting a one-way ANOVA test. First however, we checked the assumptions required for such a test. The easiest way to see this in the data was to create a side-by-side boxplot of all the regions and their quality values: 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The primary goal of this study was to determine if the origin of the Pinot Noir wine attributed to its quality. We compared the quality of the wine across each of the three regions by conducting a one-way ANOVA test. First however, we checked the assumptions required for such a test. The easiest way to see this in the data was to create a side-by-side boxplot of all the regions and their quality values: 
 
 
 ```{r, echo=F}
