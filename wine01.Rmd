@@ -25,7 +25,7 @@ output: html_document
 
 
 ```{r, echo=F}
-wine = read.table("http://www.utsc.utoronto.ca/~butler/c32/wine.txt", header=T)
+wine = read.table("*/wine.txt", header=T)
 attach(wine)
 boxplot(Quality~Region, xlab="Region", ylab="Quality")
 ```
