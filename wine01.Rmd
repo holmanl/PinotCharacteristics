@@ -1,12 +1,12 @@
 ---
 title: "Overall Quality of Pinot Noir in Relation to Source Region and Other Quality Ratings"
 author: "L. Holman, D. Davidsohn"
-output: pdf_document
+output: html_document
 ---
 ###Section 1: Introduction
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;We conducted a study on Pinot-Noir type wine. In particular, we tackled two questions of interest regarding said wine - whether or not the quality of wine can be predicted from the region it originates from and whether or not certain key characteristics of the wine can determine its quality.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;We conducted a study on Pinot-Noir type wine. In particular, we tackled two questions of interest - whether or not the quality of wine can be predicted from the region it originates from, and whether or not certain key characteristics of the wine can determine its quality.
   
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Since "quality" is a rating of the wine in question, it's reasonable to expect the rating to base off traits of the wine. Therefore, we expect there to be a relationship with one or more of the wine characteristics and its quality. We hypothesized that the strongest relationship would be between quality and flavor, because no one would acclaim a wine they couldn't drink with enjoyment.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Since "quality" is a rating of the wine in question, it's reasonable to expect the rating to be influenced by traits of the wine. Therefore, we expect there to be a relationship with one or more of the wine characteristics and its quality. We hypothesized that the strongest relationship would be between quality and flavor, because no one would acclaim a wine they could not enjoy.
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The data comes in the form of 38 observations, known as the "different Pinot Noir wines". The observations come with 7 characteristic-variables describing those wines: clarity, aroma, body, flavor, oakiness, quality and region. Most of the variables are quantitative, being on an ordinal scale. However region in particular is qualitative due to its values being labels for locations. Since the principal questions concern quality of the wines in relation with the other characteristics, it will serve as the response variable. All others are explanatory variables.
 
